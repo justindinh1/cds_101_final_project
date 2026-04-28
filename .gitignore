@@ -1,0 +1,20 @@
+# R / RStudio
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+
+# Reports
+reports/*.html
+reports/*.pdf
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Large data (students can modify as needed)
+data/*.zip
+data/*.gz
+data/*.zst
