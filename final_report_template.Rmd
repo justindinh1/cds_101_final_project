@@ -1,6 +1,6 @@
 ---
 title: "CDS 101 – Final Project Report"
-author: "Group Name / Members"
+author: "Exponentially Decaying / Nivia, Neel, Justin "
 date: "`r format(Sys.Date(), '%B %d, %Y')`"
 output:
   html_document:
