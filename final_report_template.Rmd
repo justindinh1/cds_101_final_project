@@ -21,7 +21,13 @@ output:
 - Define the objective(s) of your analysis.  
 - Mention any key assumptions.
 
--How significant is the relationship between equine incidents and weather conditions?
+-Our project investigates whether weather conditions are related to equine incidents at New York race tracks. The main question we are studying is: How significant is the relationship between equine incidents and weather conditions?
+
+This topic is important because equine deaths and injuries are serious safety concerns in horse racing. By studying incident patterns over time and comparing them with weather conditions, we may be able to identify whether certain weather factors are associated with higher or lower incident counts.
+
+The objective of this analysis is to explore trends in equine incidents from 2009 to 2025, compare incidents across different years, tracks, incident types, seasons, and weather categories, and determine whether weather appears to have a noticeable relationship with incident patterns.
+
+A key assumption is that the incident reports are accurate and consistently recorded. Another assumption is that the weather information connected to each incident is reliable enough to be grouped into categories such as clear, rainy, cloudy, snowy, or unknown.
 -
 -
 -
