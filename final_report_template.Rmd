@@ -37,13 +37,13 @@ output:
 -Equine Death and Breakdown 
 -Obtained through downloading from data.gov website.
 -There are a lot of variables / features such as Incident Type, Horse, Jockey Driver, Track, and so forth but we will be focusing primarily on two variables, Death or Injury and Weather Conditions.  Death or Injury variable shows if a horse died in an incident or was just injured.  Weather Conditions variable shows the weather conditions at the time of the incident. 
--5,383 rows and 14 columns
+-5,383 rows and 13 columns
 -
 
 ```{r setup-data, echo=FALSE, message=FALSE, warning=FALSE}
 # Example: load a dataset (replace with your own)
 library(readr)
-data <- read_csv("data/Equine_Death_and_Breakdown.csv")
+horses <- read_csv("data/Equine_Death_and_Breakdown.csv")
 ```
 
 # 3. Data Cleaning & Preprocessing
