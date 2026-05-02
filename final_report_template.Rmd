@@ -21,13 +21,7 @@ output:
 - Define the objective(s) of your analysis.  
 - Mention any key assumptions.
 
--Our project investigates whether weather conditions are related to equine incidents at New York race tracks. The main question we are studying is: How significant is the relationship between equine incidents and weather conditions?
-
-This topic is important because equine deaths and injuries are serious safety concerns in horse racing. By studying incident patterns over time and comparing them with weather conditions, we may be able to identify whether certain weather factors are associated with higher or lower incident counts.
-
-The objective of this analysis is to explore trends in equine incidents from 2009 to 2025, compare incidents across different years, tracks, incident types, seasons, and weather categories, and determine whether weather appears to have a noticeable relationship with incident patterns.
-
-A key assumption is that the incident reports are accurate and consistently recorded. Another assumption is that the weather information connected to each incident is reliable enough to be grouped into categories such as clear, rainy, cloudy, snowy, or unknown.
+-How significant is the relationship between equine incidents and weather conditions?
 -
 -
 -
@@ -47,7 +41,12 @@ A key assumption is that the incident reports are accurate and consistently reco
 -
 
 ```{r setup-data, echo=FALSE, message=FALSE, warning=FALSE}
-# Example: load a dataset (replace with your own)
+#Load packages
+library(dplyr)
+library(lubridate)
+library(stringr)
+
+#Load dataset
 library(readr)
 horses <- read_csv("data/Equine_Death_and_Breakdown.csv")
 ```
@@ -62,13 +61,78 @@ Describe the steps you took to make the data usable, for example:
 - Creating new features (feature engineering).  
 - Any scaling or encoding.
 
+-Fixed the column names, fixed duplicate rows, fixed dates, handled missing values (NA weather conditions)
+
 ```{r cleaning, eval=FALSE}
-# Example pseudo-code for cleaning:
-# data_clean <- data |>
-#   dplyr::filter(!is.na(target_variable)) |>
-#   dplyr::mutate(
-#     new_feature = some_transformation(old_feature)
-#   )
+#Fix column names
+horses_clean <- horses %>%
+  rename(year = Year, incident_date = `Incident Date`, track = Track, inv_location = `Inv Location`, racing_type_description = `Racing Type Description`, division = Division, weather_conditions = `Weather Conditions`, horse = Horse, trainer = Trainer, jockey_driver = `Jockey Driver`, incident_description = `Incident Description`, death_or_injury = `Death or Injury`, incident_type = `Incident Type`)
+
+#Fix dates
+horses_clean$incident_date <- mdy(horses_clean$incident_date)
+
+#Get rid of NA entries
+horses_clean <- horses_clean %>%
+  filter(!is.na(weather_conditions), !is.na(death_or_injury))
+
+#Fix weather_condition column
+#USED CHATGPT FOR THIS CODE!!!!!!!!!
+
+horses_clean <- horses_clean %>%
+  mutate(
+    weather_clean = weather_conditions %>%
+      str_to_lower() %>%
+      str_trim() %>%
+      str_replace_all("[0-9]+", "") %>%        # remove numbers
+      str_replace_all("[^a-z ]", "") %>%       # remove symbols
+      str_replace_all("couldy|cloudyy|clody", "cloudy") %>%
+      str_replace_all("raine", "rain") %>%
+      str_squish()
+  ) %>%
+  
+  mutate(
+    weather_group = case_when(
+      
+      # Rain
+      str_detect(weather_clean, "rain|shower|drizzle") ~ "Rain",
+      
+      # Snow
+      str_detect(weather_clean, "snow|flurr|sleet") ~ "Snow",
+      
+      # Storms
+      str_detect(weather_clean, "thunder|storm") ~ "Storm",
+      
+      # Cloudy / Overcast
+      str_detect(weather_clean, "cloud|overcast") ~ "Cloudy",
+      
+      # Clear / Sunny
+      str_detect(weather_clean, "clear|sun|fair|dry") ~ "Clear",
+      
+      # Other weather conditions
+      str_detect(weather_clean, "wind|fog|mist|hazy|humid|cold|hot") ~ "Other Weather",
+      
+      # Missing / junk
+      weather_clean %in% c("", "na", "n a", "unc") | is.na(weather_clean) ~ "Unknown",
+      
+      TRUE ~ "Other"
+    )
+  )
+
+#Clean death_or_injury column
+horses_clean <- horses_clean %>%
+  mutate(
+    death_or_injury_clean = death_or_injury %>%
+      str_to_lower() %>%
+      str_trim(),
+    
+    death_or_injury_clean = case_when(
+      str_detect(death_or_injury_clean, "death|dead|euthanasia") ~ "Death",
+      str_detect(death_or_injury_clean, "lame|injury|lameness") ~ "Injury",
+      TRUE ~ "Other"
+    )
+  ) 
+
+
 ```
 
 # 4. Exploratory Data Analysis (EDA)
