@@ -12,42 +12,29 @@ output:
     toc: true
 ---
 
-> Replace this template text with your own writing, keeping the headings and overall structure aligned with the **CDS 101 project rubric**.
-
 # 1. Problem Definition
 
-- Clearly state the main problem or question you are investigating.  
-- Explain why it is interesting or important.  
-- Define the objective(s) of your analysis.  
-- Mention any key assumptions.
+* Our project investigates whether weather conditions are related to equine incidents at New York race tracks. The main question we are studying is: How significant is the relationship between equine incidents and weather conditions?
 
--Our project investigates whether weather conditions are related to equine incidents at New York race tracks. The main question we are studying is: How significant is the relationship between equine incidents and weather conditions?
+* This topic is important because equine deaths and injuries are serious safety concerns in horse racing. By studying incident patterns over time and comparing them with weather conditions, we may be able to identify whether certain weather factors are associated with higher or lower incident counts.
 
-This topic is important because equine deaths and injuries are serious safety concerns in horse racing. By studying incident patterns over time and comparing them with weather conditions, we may be able to identify whether certain weather factors are associated with higher or lower incident counts.
+* The objective of this analysis is to explore trends in equine incidents from 2009 to 2025, compare incidents across different years, tracks, incident types, seasons, and weather categories, and determine whether weather appears to have a noticeable relationship with incident patterns.
 
-The objective of this analysis is to explore trends in equine incidents from 2009 to 2025, compare incidents across different years, tracks, incident types, seasons, and weather categories, and determine whether weather appears to have a noticeable relationship with incident patterns.
-
-A key assumption is that the incident reports are accurate and consistently recorded. Another assumption is that the weather information connected to each incident is reliable enough to be grouped into categories such as clear, rainy, cloudy, snowy, or unknown.
+* A key assumption is that the incident reports are accurate and consistently recorded. Another assumption is that the weather information connected to each incident is reliable enough to be grouped into categories such as clear, rainy, cloudy, snowy, or unknown.
 
 # 2. Data Acquisition & Description
-
-- Name and source of the dataset(s).  
-- How you obtained the data (download link, API, etc.).  
-- Brief description of the variables / features (with units if relevant).  
-- Approximate size (rows, columns).  
-- Any ethical, privacy, or bias considerations (if applicable).
 
 -Equine Death and Breakdown 
 -Obtained through downloading from data.gov website.
 -There are a lot of variables / features such as Incident Type, Horse, Jockey Driver, Track, and so forth but we will be focusing primarily on two variables, Death or Injury and Weather Conditions.  Death or Injury variable shows if a horse died in an incident or was just injured.  Weather Conditions variable shows the weather conditions at the time of the incident. 
 -5,383 rows and 13 columns
--
 
 ```{r setup-data, echo=FALSE, message=FALSE, warning=FALSE}
 #Load packages
 library(dplyr)
 library(lubridate)
 library(stringr)
+library(ggplot2)
 
 #Load dataset
 library(readr)
@@ -106,13 +93,13 @@ horses_clean <- horses_clean %>%
       str_detect(weather_clean, "thunder|storm") ~ "Storm",
       
       # Cloudy / Overcast
-      str_detect(weather_clean, "cloud|overcast") ~ "Cloudy",
+      str_detect(weather_clean, "cloud|coudy|cloudy") ~ "Cloudy",
       
       # Clear / Sunny
       str_detect(weather_clean, "clear|sun|fair|dry") ~ "Clear",
       
       # Other weather conditions
-      str_detect(weather_clean, "wind|fog|mist|hazy|humid|cold|hot") ~ "Other Weather",
+      str_detect(weather_clean, "windy|fog|mist|hazy|wind") ~ "Other Weather",
       
       # Missing / junk
       weather_clean %in% c("", "na", "n a", "unc") | is.na(weather_clean) ~ "Unknown",
@@ -133,9 +120,12 @@ horses_clean <- horses_clean %>%
       str_detect(death_or_injury_clean, "lame|injury|lameness") ~ "Injury",
       TRUE ~ "Other"
     )
-  ) 
+  )
 
-
+horses_clean <- horses_clean %>%
+  filter(death_or_injury_clean != "Other") %>%
+  select(year, incident_date, incident_type, track, incident_description, weather_group, death_or_injury_clean) %>%
+  filter(weather_group != "Other" & weather_group != "Unknown")
 ```
 
 # 4. Exploratory Data Analysis (EDA)
@@ -147,16 +137,20 @@ This section maps directly to the **EDA** part of the rubric:
 - Interpretation connected to the research question  
 
 ```{r eda-summary, message=FALSE, warning=FALSE}
-# library(dplyr)
-# summary(data_clean)
+summary(horses_clean)
 ```
 
 ```{r eda-plot-example, message=FALSE, warning=FALSE, fig.cap="Example histogram of a numeric variable (EDA rubric)."}
-# library(ggplot2)
-# ggplot(data_clean, aes(x = some_numeric_variable)) +
-#   geom_histogram(binwidth = 5, color = "white") +
-#   labs(x = "Some Variable", y = "Count", title = "Distribution of Some Variable")
+#Weather vs Incidents Graph
+ggplot(horses_clean, aes(x = death_or_injury_clean, fill = death_or_injury_clean)) +
+  geom_bar() +
+  facet_wrap(~ weather_group) +
+  labs(
+    x = "Death or Injury", 
+    y = "Count", 
+    title = "Equine Incidents vs Weather Condition")
 ```
+
 
 # 5. Visualization Quality and Storytelling
 
@@ -165,6 +159,8 @@ Use this section to satisfy the **Visualization Quality** rubric criterion:
 - Explain why your plot types are appropriate.  
 - Comment on labels, legends, colors, and overall readability.  
 - Mention any steps you took to make plots accessible and interpretable.
+
+-Plot type for Death and Injury vs Weather Conditions is appropriate because they are both catagorical variables.
 
 # 6. Modeling Approach
 
@@ -212,7 +208,9 @@ Summarize the key takeaways:
 Briefly document how someone else can reproduce your results:
 
 - Which R scripts or Rmd files to run.  
-- Any required R packages.  
+- Any required R packages.
+
+-Explain how code is structured and include a link to your Git repository
 
 ```{r session-info, echo=FALSE}
 sessionInfo()
@@ -225,7 +223,3 @@ List any references you used, such as:
 - Dataset documentation.  
 - Research papers or articles.  
 - Tutorials or blog posts.
-
-# Appendix (Optional)
-
-Include extra plots, diagnostic checks, or model comparisons if needed.
