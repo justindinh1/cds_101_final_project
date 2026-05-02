@@ -126,6 +126,16 @@ horses_clean <- horses_clean %>%
   filter(death_or_injury_clean != "Other") %>%
   select(year, incident_date, incident_type, track, incident_description, weather_group, death_or_injury_clean) %>%
   filter(weather_group != "Other" & weather_group != "Unknown")
+
+#Create season variable (Code reference linked below)
+horses_clean <- horses_clean %>%
+  mutate(
+    season = case_when(
+    month(incident_date) %in% 9:11 ~ "Fall",
+    month(incident_date) %in% c(12,1,2) ~ "Winter",
+    month(incident_date) %in% 3:5 ~ "Spring",
+    TRUE ~ "Summer"
+  ))
 ```
 
 # 4. Exploratory Data Analysis (EDA)
@@ -140,16 +150,28 @@ This section maps directly to the **EDA** part of the rubric:
 summary(horses_clean)
 ```
 
+
+ii.
 ```{r eda-plot-example, message=FALSE, warning=FALSE, fig.cap="Example histogram of a numeric variable (EDA rubric)."}
 #Weather vs Incidents Graph
-ggplot(horses_clean, aes(x = death_or_injury_clean, fill = death_or_injury_clean)) +
+horses_clean %>%
+ggplot(aes(x = death_or_injury_clean, fill = death_or_injury_clean)) +
   geom_bar() +
   facet_wrap(~ weather_group) +
   labs(
     x = "Death or Injury", 
-    y = "Count", 
     title = "Equine Incidents vs Weather Condition")
 ```
+iii.
+```{r}
+horses_clean %>%
+  ggplot(aes(x = season)) +
+  geom_bar() +
+  labs(
+    title = "Equine Incidents vs Season"
+  )
+```
+
 
 
 # 5. Visualization Quality and Storytelling
@@ -223,3 +245,5 @@ List any references you used, such as:
 - Dataset documentation.  
 - Research papers or articles.  
 - Tutorials or blog posts.
+
+[Dates to seasons column](https://stackoverflow.com/questions/49702002/creating-season-variable-by-month-with-dplyr-in-r)
