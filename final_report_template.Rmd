@@ -46,15 +46,7 @@ horses <- read_csv("data/Equine_Death_and_Breakdown.csv")
 
 # 3. Data Cleaning & Preprocessing
 
-Describe the steps you took to make the data usable, for example:
-
-- Handling missing values (drop, impute, etc.).  
-- Fixing types (dates, numeric vs. categorical).  
-- Removing outliers (if done).  
-- Creating new features (feature engineering).  
-- Any scaling or encoding.
-
--Fixed the column names, fixed duplicate rows, fixed dates, handled missing values (NA weather conditions)
+* This dataset was extremely messy and we had to do a lot of cleaning to make it usable. We got rid of any rows that had NA values in the Weather Condition and Death and Injury variables.  The incident date variable had to be changed to a date type. The column names were fixed to make it easier to use and read. Originally the dataset's weather condition variable had 1000+ different unique entries but we wanted them to be categorized in just a few simple ones.  The weather_clean variable that was created that holds the weather_conditions values without all the unnecessary information and spaces. This is then piped into weather_group which categorizes the specific weather condition happening at the time of the incident such as “Rain”, “Snow”, or “Clear” and so forth.  The death_or_injury_clean variable cleans up the 10 unique values and categorizes them into 2 simple ones “death” or “injury.” After creating these new variables we filtered them to only include the values that were relevant to our research question. A season variable was also created for EDA. Finally, the Weather Condition variable was cleaned so that way The Death and Injury variable had to be encoded to binary 0/1 variable since its a categorical variable and we need a numerical values to make a linear regression model.
 
 ```{r cleaning, eval=FALSE}
 #Fix column names
