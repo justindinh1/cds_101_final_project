@@ -24,10 +24,13 @@ output:
 
 # 2. Data Acquisition & Description
 
--Equine Death and Breakdown 
--Obtained through downloading from data.gov website.
--There are a lot of variables / features such as Incident Type, Horse, Jockey Driver, Track, and so forth but we will be focusing primarily on two variables, Death or Injury and Weather Conditions.  Death or Injury variable shows if a horse died in an incident or was just injured.  Weather Conditions variable shows the weather conditions at the time of the incident. 
--5,383 rows and 13 columns
+* The name of the dataset is Equine Death and Breakdown from the data.gov website which is an official website of the United States government.
+
+* Obtained through a download link from data.gov website.
+
+* There are a lot of variables / features such as Incident Type, Horse, Jockey Driver, Track, and so forth but we will be focusing primarily on two variables, Death or Injury and Weather Conditions. Death or Injury variable shows if a horse died in an incident or was just injured.  Weather Conditions variable shows the weather conditions at the time of the incident. We will also be using "Track", "Year", and "Incident Date" columns to help supplement our findings. 
+
+* The dataset has 5,383 rows and 13 columns.
 
 ```{r setup-data, echo=FALSE, message=FALSE, warning=FALSE}
 #Load packages
@@ -150,8 +153,19 @@ This section maps directly to the **EDA** part of the rubric:
 summary(horses_clean)
 ```
 
-
 ii.
+```{r}
+horses_clean %>%
+  ggplot(aes(x = season)) +
+  geom_bar() +
+  labs(
+    title = "Equine Incidents vs Season"
+  )
+```
+
+* We assume that Winter has the most inclement weather out of all the seasons and yet we see that Winter has the least amount of Equine deaths and injuries which could indicate a weak correlation between season and Equine incidences if we take our assumption as the truth.  
+
+iii.
 ```{r eda-plot-example, message=FALSE, warning=FALSE, fig.cap="Example histogram of a numeric variable (EDA rubric)."}
 #Weather vs Incidents Graph
 horses_clean %>%
@@ -162,17 +176,8 @@ ggplot(aes(x = death_or_injury_clean, fill = death_or_injury_clean)) +
     x = "Death or Injury", 
     title = "Equine Incidents vs Weather Condition")
 ```
-iii.
-```{r}
-horses_clean %>%
-  ggplot(aes(x = season)) +
-  geom_bar() +
-  labs(
-    title = "Equine Incidents vs Season"
-  )
-```
 
-
+* There does not appear to be a clear correlation between weather condition and Equine death or injury.
 
 # 5. Visualization Quality and Storytelling
 
@@ -182,7 +187,7 @@ Use this section to satisfy the **Visualization Quality** rubric criterion:
 - Comment on labels, legends, colors, and overall readability.  
 - Mention any steps you took to make plots accessible and interpretable.
 
--Plot type for Death and Injury vs Weather Conditions is appropriate because they are both catagorical variables.
+* For graphs ii. and iii. we used bar graphs because we were comparing two categorical variables to each other.  
 
 # 6. Modeling Approach
 
