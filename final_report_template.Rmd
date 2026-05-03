@@ -141,70 +141,6 @@ This section maps directly to the **EDA** part of the rubric:
 - Visualizations  
 - Interpretation connected to the research question  
 
-## Incident Type
-
-This section looks at the different types of racing incidents in the dataset. 
-The goal is to see which incident types happen most often and whether those incident types changed over time.
-```{r}
-library(readr)
-
-Equine_Death_and_Breakdown <- read_csv("data/Equine_Death_and_Breakdown.csv")
-```
-
-#Number of incidents by incident type
-```{r}
-incident_summary <- as.data.frame(
-  sort(table(Equine_Death_and_Breakdown[["Incident Type"]]), decreasing = TRUE)
-)
-
-names(incident_summary) <- c("Incident Type", "n")
-
-incident_summary
-```
-*This graph connects to our research question by showing which types of equine incidents happen most often in the data set. Since our project is studying the relationship between weather related variables and equine deaths or breakdowns, we first need to understand what kinds of incidents are being recorded. The most common incident types are the main categories we can later compare with weather conditions, temperature, precipitation, or season. This graph does not show a weather relationship by itself, but it gives important background for the weather analysis.
-
-#Incident type by year
-```{r}
-library(ggplot2)
-
-top_incident_types <- incident_summary$`Incident Type`[1:5]
-
-incident_year_data <- Equine_Death_and_Breakdown[
-  Equine_Death_and_Breakdown[["Incident Type"]] %in% top_incident_types &
-    !is.na(Equine_Death_and_Breakdown[["Year"]]),
-]
-
-incident_year_summary <- as.data.frame(
-  table(
-    Year = incident_year_data[["Year"]],
-    Incident_Type = incident_year_data[["Incident Type"]]
-  )
-)
-
-names(incident_year_summary) <- c("Year", "Incident Type", "n")
-
-incident_year_summary <- incident_year_summary[incident_year_summary$n > 0, ]
-
-incident_year_summary$Year <- as.numeric(as.character(incident_year_summary$Year))
-
-ggplot(incident_year_summary, 
-       aes(x = Year, y = n, color = `Incident Type`, group = `Incident Type`)) +
-  geom_line() +
-  geom_point() +
-  labs(
-    title = "Top Incident Types by Year",
-    x = "Year",
-    y = "Number of Incidents",
-    color = "Incident Type"
-  )
-```
-*This graph helps connect to our question by showing how incident types changed over time. If certain years had higher numbers of specific incident categories, those changes could later be compared with weather patterns from those same years. This helps us look for possible trends before testing whether weather-related variables are connected to equine deaths or breakdowns. The graph does not prove that weather caused the incidents, but it helps identify time-based patterns that may be useful for the rest of the project.
-
-#Time Trends
-
-
-
-#Weather/Season Pattern
 ```{r eda-summary, message=FALSE, warning=FALSE}
 summary(horses_clean)
 ```
@@ -235,7 +171,6 @@ ggplot(aes(x = death_or_injury_clean, fill = death_or_injury_clean)) +
 
 * There does not appear to be a clear correlation between weather condition and Equine death or injury.
 
-
 # 5. Visualization Quality and Storytelling
 
 Use this section to satisfy the **Visualization Quality** rubric criterion:
@@ -245,9 +180,6 @@ Use this section to satisfy the **Visualization Quality** rubric criterion:
 - Mention any steps you took to make plots accessible and interpretable.
 
 * For graphs ii. and iii. we used bar graphs because we were comparing two categorical variables to each other.  
-
-*For the incident type section, we used a bar graph first because we are looking at incident type which is categorical.This graph makes sense because it lets us compare how many incidents happened in each incident type, and we flipped the graph so the incident type names are easier to read instead of crowded on the x-axis. For the second graph, we used a line graph because we are looking at incident type by year, which helps show how the incident categories changed over time instead of only showing the total number of incidents. 
-
 
 # 6. Modeling Approach
 
@@ -280,6 +212,7 @@ Describe:
 # preds <- predict(model, newdata = test, type = "response")
 # # compute metrics...
 ```
+
 
 # 8. Conclusions & Recommendations
 
