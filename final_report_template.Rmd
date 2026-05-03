@@ -276,6 +276,12 @@ Explain how you framed the problem and which models you chose:
 - Baseline model or heuristic, if used.  
 - Main model(s) chosen and why they are appropriate.
 
+For our modeling approach, we followed the plan from our proposal by using ideas from the blood pressure assignment and the car prices assignment. In the blood pressure assignment, we looked at relationships between variables and used linear models to understand trends. In the car prices assignment, we used a model with more than one explanatory variable. For our project, we used the number of incidents as the response variable because incident count is numeric and works with a linear model. The explanatory variables we focused on were year, season, weather condition, and incident type. These variables match the graphs we made because we looked at incidents over time, incident categories, incidents by season, and incidents by weather condition.
+
+For our baseline model, we would use a simple heuristic, which is a simple rule for making a prediction. Our heuristic would predict the average number of incidents every time without using year, season, weather condition, or incident type. This gives us a simple comparison for our multi-variable linear model. If the multi-variable model makes better predictions than just using the average incident count, then that would suggest that the variables we chose are useful for explaining patterns in the data.
+This connects to our research question because we are trying to see whether weather-related variables are connected to equine deaths and breakdowns. The incidents-over-time graph shows that incident counts changed by year, so year is an important variable to include. The incident type graphs show which categories happened the most and whether those categories changed over time. The season and weather condition graphs connect more directly to the weather part of our project because they show how incidents are spread across different seasons and weather conditions. Using a multi-variable linear model helps us look at these variables together instead of only looking at one graph or one factor at a time.
+
+
 # 7. Model Implementation & Evaluation
 
 This corresponds to the **Model Implementation & Evaluation** rubric criterion.
@@ -299,7 +305,11 @@ Describe:
 # preds <- predict(model, newdata = test, type = "response")
 # # compute metrics...
 ```
+For the model implementation, the response variable would be the count of incidents, and the main features would be year, season, weather condition, and incident type. We included year as a time trend variable because the incidents-over-time graph showed that incident counts were not the same every year. This matters because the model should account for changes over time instead of treating all years as equal. We included season and weather condition because our research question focuses on weather-related factors. We also included incident type because different categories of incidents may have different patterns.
 
+The graphs support these choices because they show that incidents are not evenly spread across the dataset. The incident type graph shows that some incident categories happen more often than others. The incident type by year graph shows that those categories also changed over time. The season and weather condition graphs show that incidents were different across seasons and weather conditions. Clear and cloudy weather had higher recorded incident counts, but we have to be careful with that interpretation because it does not automatically mean those conditions caused more incidents. There may have been more races during clear or cloudy weather, which would create more chances for incidents to happen.
+
+To evaluate the model, we would compare the model’s predicted incident counts to the actual incident counts. We would also compare the model to our baseline heuristic, which only predicts the average number of incidents. If the multi-variable model gives predictions that are closer to the actual incident counts than the simple average, then the variables we chose are helping explain the data. Overall, this follows our proposed method because we used time trends, incident categories, weather-related variables, and a multi-variable linear model to look for patterns connected to equine deaths and breakdowns.
 
 # 8. Conclusions & Recommendations
 
