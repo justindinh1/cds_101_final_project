@@ -240,6 +240,8 @@ Use this section to satisfy the **Visualization Quality** rubric criterion:
 - Comment on labels, legends, colors, and overall readability.  
 - Mention any steps you took to make plots accessible and interpretable.
 
+* For the incident type section, we used a bar graph first because we are looking at incident type which is categorical.This graph makes sense because it lets us compare how many incidents happened in each incident type, and we flipped the graph so the incident type names are easier to read instead of crowded on the x-axis. For the second graph, we used a line graph because we are looking at incident type by year, which helps show how the incident categories changed over time instead of only showing the total number of incidents. 
+
 * For graphs ii. and iii. we used bar graphs because we were comparing two categorical variables to each other.  
 
 # 6. Modeling Approach
