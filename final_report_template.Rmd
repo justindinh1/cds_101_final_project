@@ -1,16 +1,52 @@
 ---
-title: "CDS 101 – Final Project Report"
-author: "Exponentially Decaying / Nivia, Neel, Justin "
-date: "`r format(Sys.Date(), '%B %d, %Y')`"
+title: "CDS 101 -Final Project Report"
+author: "Exponentially Decaying / Nivia, Neel, Justin"
+date: "`r Sys.Date()`"
+documentclass: article
+geometry: margin=1in
+fontsize: 11pt
 output:
-  html_document:
-    css: "gmu-cds101.css"
-    toc: true
-    toc_depth: 3
-    number_sections: true
   pdf_document:
-    toc: true
+    toc: false
+    df_print: kable
+    fig_caption: false
+    number_sections: false
+    dev: pdf
+    highlight: tango
+  html_document:
+    theme: default
+    self_contained: true
+    toc: false
+    df_print: kable
+    fig_caption: false
+    number_sections: false
+    smart: true
+    dev: svg
 ---
+
+```{r setup-data, echo=FALSE, message=FALSE, warning=FALSE}
+# DO NOT ALTER THIS CHUNK
+knitr::opts_chunk$set(
+  echo = TRUE,
+  eval = TRUE,
+  fig.width = 5,
+  fig.asp = 0.618,
+  out.width = "70%",
+  dpi = 120,
+  fig.align = "center",
+  cache = FALSE
+)
+#Load packages
+library(dplyr)
+library(lubridate)
+library(stringr)
+library(ggplot2)
+
+#Load dataset
+library(readr)
+horses <- read_csv("data/Equine_Death_and_Breakdown.csv")
+```
+
 
 # 1. Problem Definition
 
@@ -32,23 +68,11 @@ output:
 
 * The dataset has 5,383 rows and 13 columns.
 
-```{r setup-data, echo=FALSE, message=FALSE, warning=FALSE}
-#Load packages
-library(dplyr)
-library(lubridate)
-library(stringr)
-library(ggplot2)
-
-#Load dataset
-library(readr)
-horses <- read_csv("data/Equine_Death_and_Breakdown.csv")
-```
-
-# 3. Data Cleaning & Preprocessing HII
+# 3. Data Cleaning & Preprocessing
 
 * This dataset was extremely messy and we had to do a lot of cleaning to make it usable. We got rid of any rows that had NA values in the Weather Condition and Death and Injury variables.  The incident date variable had to be changed to a date type. The column names were fixed to make it easier to use and read. Originally the dataset's weather condition variable had 1000+ different unique entries but we wanted them to be categorized in just a few simple ones.  The weather_clean variable that was created that holds the weather_conditions values without all the unnecessary information and spaces. This is then piped into weather_group which categorizes the specific weather condition happening at the time of the incident such as “Rain”, “Snow”, or “Clear” and so forth.  The death_or_injury_clean variable cleans up the 10 unique values and categorizes them into 2 simple ones “death” or “injury.” After creating these new variables we filtered them to only include the values that were relevant to our research question. A season variable was also created for EDA. Finally, the Weather Condition variable was cleaned so that way The Death and Injury variable had to be encoded to binary 0/1 variable since its a categorical variable and we need a numerical values to make a linear regression model.
 
-```{r cleaning, eval=FALSE}
+```{r}
 #Fix column names
 horses_clean <- horses %>%
   rename(year = Year, incident_date = `Incident Date`, track = Track, inv_location = `Inv Location`, racing_type_description = `Racing Type Description`, division = Division, weather_conditions = `Weather Conditions`, horse = Horse, trainer = Trainer, jockey_driver = `Jockey Driver`, incident_description = `Incident Description`, death_or_injury = `Death or Injury`, incident_type = `Incident Type`)
@@ -286,6 +310,8 @@ Summarize the key takeaways:
 - Discuss limitations (data size, bias, missing variables, etc.).  
 - Suggest possible extensions or future work.
 
+* Possible
+
 # 9. Code Quality & Reproducibility
 
 Briefly document how someone else can reproduce your results:
@@ -295,10 +321,6 @@ Briefly document how someone else can reproduce your results:
 
 -Explain how code is structured and include a link to your Git repository
 
-```{r session-info, echo=FALSE}
-sessionInfo()
-```
-
 # 10. References
 
 List any references you used, such as:
@@ -307,4 +329,4 @@ List any references you used, such as:
 - Research papers or articles.  
 - Tutorials or blog posts.
 
-[Dates to seasons column](https://stackoverflow.com/questions/49702002/creating-season-variable-by-month-with-dplyr-in-r)
+[Dates to seasons column tutorial](https://stackoverflow.com/questions/49702002/creating-season-variable-by-month-with-dplyr-in-r)
