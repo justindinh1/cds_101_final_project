@@ -139,11 +139,72 @@ This section maps directly to the **EDA** part of the rubric:
 
 - Summary statistics  
 - Visualizations  
-- Interpretation connected to the research question  
+- Interpretation connected to the research question
 
 ```{r eda-summary, message=FALSE, warning=FALSE}
 summary(horses_clean)
 ```
+
+
+## Incident Type
+
+This section looks at the different types of racing incidents in the dataset.
+The goal is to see which incident types happen most often and whether those incident types changed over time.
+```{r}
+library(readr)
+
+Equine_Death_and_Breakdown <- read_csv("data/Equine_Death_and_Breakdown.csv")
+```
+
+#Number of incidents by incident type
+```{r}
+incident_summary <- as.data.frame(
+  sort(table(Equine_Death_and_Breakdown[["Incident Type"]]), decreasing = TRUE)
+)
+
+names(incident_summary) <- c("Incident Type", "n")
+
+incident_summary
+```
+*This graph connects to our research question by showing which types of equine incidents happen most often in the data set. Since our project is studying the relationship between weather related variables and equine deaths or breakdowns, we first need to understand what kinds of incidents are being recorded. The most common incident types are the main categories we can later compare with weather conditions, temperature, precipitation, or season. This graph does not show a weather relationship by itself, but it gives important background for the weather analysis.
+
+#Incident type by year
+```{r}
+library(ggplot2)
+
+top_incident_types <- incident_summary$`Incident Type`[1:5]
+
+incident_year_data <- Equine_Death_and_Breakdown[
+  Equine_Death_and_Breakdown[["Incident Type"]] %in% top_incident_types &
+    !is.na(Equine_Death_and_Breakdown[["Year"]]),
+]
+
+incident_year_summary <- as.data.frame(
+  table(
+    Year = incident_year_data[["Year"]],
+    Incident_Type = incident_year_data[["Incident Type"]]
+  )
+)
+
+names(incident_year_summary) <- c("Year", "Incident Type", "n")
+
+incident_year_summary <- incident_year_summary[incident_year_summary$n > 0, ]
+
+incident_year_summary$Year <- as.numeric(as.character(incident_year_summary$Year))
+
+ggplot(incident_year_summary,
+       aes(x = Year, y = n, color = `Incident Type`, group = `Incident Type`)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Top Incident Types by Year",
+    x = "Year",
+    y = "Number of Incidents",
+    color = "Incident Type"
+  )
+```
+*This graph helps connect to our question by showing how incident types changed over time. If certain years had higher numbers of specific incident categories, those changes could later be compared with weather patterns from those same years. This helps us look for possible trends before testing whether weather-related variables are connected to equine deaths or breakdowns. The graph does not prove that weather caused the incidents, but it helps identify time-based patterns that may be useful for the rest of the project.
+
 
 ii.
 ```{r}
