@@ -181,15 +181,6 @@ labs(
 theme_minimal()
 ```
 
-
-
-
-```{r}
-library(readr)
-
-Equine_Death_and_Breakdown <- read_csv("data/Equine_Death_and_Breakdown.csv")
-```
-
 ```{r}
 horses_clean %>%
   filter(death_or_injury_clean == "Injury") %>%
@@ -208,25 +199,26 @@ horses_clean %>%
 ```{r}
 library(tidyverse)
 
-Equine_Death_and_Breakdown %>%
-  filter(`Incident Type` %in% c(
+horses_clean %>%
+  filter(incident_type %in% c(
     "EQUINE DEATH",
     "STEWARDS/VETS LIST",
     "RACING INCIDENT",
     "RACING INJURY",
     "FALL OF RIDER"
   )) %>%
-  count(Year, `Incident Type`) %>%
-  ggplot(aes(x = Year, y = n)) +
+  count(year, incident_type) %>%
+  ggplot(aes(x = year, y = n)) +
   geom_point() +
   geom_smooth(method = "lm") +
-  facet_wrap(~ `Incident Type`, scales = "free_y") +
+  facet_wrap(~ incident_type, scales = "free_y") +
   labs(
     title = "Top Incident Types by Year",
     x = "Year",
     y = "Number of Incidents"
   )
 ```
+
 
 * These graphs help connect to our question by showing how incident types changed over time. If certain years had higher numbers of specific incident categories, those changes could later be compared with weather patterns from those same years. This helps us look for possible trends before testing whether weather-related variables are connected to equine deaths or breakdowns. The graph does not prove that weather caused the incidents, but it helps identify time-based patterns that may be useful for the rest of the project.
 
