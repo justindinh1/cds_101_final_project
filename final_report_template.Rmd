@@ -329,4 +329,4 @@ List any references you used, such as:
 - Research papers or articles.  
 - Tutorials or blog posts.
 
-[Dates to seasons column tutorial](https://stackoverflow.com/questions/49702002/creating-season-variable-by-month-with-dplyr-in-r)
+* [Dates to seasons column tutorial](https://stackoverflow.com/questions/49702002/creating-season-variable-by-month-with-dplyr-in-r)
