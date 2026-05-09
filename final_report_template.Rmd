@@ -313,7 +313,7 @@ Summarize the key takeaways:
 - Discuss limitations (data size, bias, missing variables, etc.).  
 - Suggest possible extensions or future work.
 
-* Possible
+* In conclusion, our project helped us see that equine deaths and breakdowns are affected by more than one factor. We looked at incident types, time trends, seasons, and weather conditions to see what patterns showed up in the data. The graphs showed that some incident categories happened more often than others, and the number of incidents was not the same every year or every season. Even though weather was the main focus of our research question, the results show that we have to be careful when interpreting the graphs. Higher incident counts in one weather condition do not automatically mean that weather caused more incidents. It may also depend on a vast number of reasons due to the various parts of racing. (doesn't take into account the races that didn't take place due to them canceling) 
 
 # 9. Code Quality & Reproducibility
 
