@@ -41,6 +41,7 @@ library(dplyr)
 library(lubridate)
 library(stringr)
 library(ggplot2)
+library(tidyverse)
 
 #Load dataset
 library(readr)
@@ -165,7 +166,9 @@ summary(horses_clean)
 
 i.
 ```{r eda-scatter-plot, message=FALSE, warning=FALSE, fig.cap="Relationship between time of year and weather related equine incidents"}
+library(ggplot2)
 ggplot(horses, aes(x = Year, color = 'white')) +
+geom_line(stat = "count") +
 geom_point(stat = "count", size = 3) +
 labs(
   x = "Year", 
@@ -174,6 +177,7 @@ labs(
   ) +
 theme_minimal()
 ```
+
 
 * The data overall shows a clear decline in equine incidents from 2009 to 2026 with few inconsistencies. Incident counts start at a moderate level in the late 2000s and rise very fast and peak in 2012. After that the count steadily falls. This pattern equine incidents have generally decreased over the years. The inconsistencies show how the incident counts do not decrease perfectly smoothly, indicating that many external factors such as heat, cold, rain, etc. contribute to short term increases.
 
@@ -196,7 +200,6 @@ horses_clean %>%
 
 iii.
 ```{r}
-library(tidyverse)
 
 horses_clean %>%
   filter(incident_type %in% c(
