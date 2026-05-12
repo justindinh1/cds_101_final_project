@@ -64,13 +64,13 @@ horses <- read_csv("data/Equine_Death_and_Breakdown.csv")
 
 * Obtained through a download link from data.gov website.
 
-* There are a lot of variables / features such as Incident Type, Horse, Jockey Driver, Track, and so forth but we will be focusing primarily on two variables, Death or Injury and Weather Conditions. Death or Injury variable shows if a horse died in an incident or was just injured.  Weather Conditions variable shows the weather conditions at the time of the incident. We will also be using "Track", "Year", and "Incident Date" columns to help supplement our findings. 
+* There are a lot of variables / features such as Incident Type, Horse, Jockey Driver, Track, and so forth but we will be focusing primarily on two variables, Death or Injury and Weather Conditions. Death or Injury variable shows if a horse died in an incident or was just injured.  Weather Conditions variable shows the weather conditions at the time of the incident. We will also be using "Track", "Year", and "Incident Date", and "Incident Type" columns to help supplement our findings. 
 
 * The dataset has 5,383 rows and 13 columns.
 
 # 3. Data Cleaning & Preprocessing
 
-* This dataset was extremely messy and we had to do a lot of cleaning to make it usable. We got rid of any rows that had NA values in the Weather Condition and Death and Injury variables.  The incident date variable had to be changed to a date type. The column names were fixed to make it easier to use and read. Originally the dataset's weather condition variable had 1000+ different unique entries but we wanted them to be categorized in just a few simple ones.  The weather_clean variable that was created that holds the weather_conditions values without all the unnecessary information and spaces. This is then piped into weather_group which categorizes the specific weather condition happening at the time of the incident such as “Rain”, “Snow”, or “Clear” and so forth.  The death_or_injury_clean variable cleans up the 10 unique values and categorizes them into 2 simple ones “death” or “injury.” After creating these new variables we filtered them to only include the values that were relevant to our research question. A season variable was also created for EDA. Finally, the Weather Condition variable was cleaned so that way The Death and Injury variable had to be encoded to binary 0/1 variable since its a categorical variable and we need a numerical values to make a linear regression model.
+* This dataset was extremely messy and we had to do a lot of cleaning to make it usable and went from 5,383 rows to just 1,702. We got rid of any rows that had NA values in the Weather Condition and Death and Injury variables.  The incident date variable had to be changed to a date type. The column names were fixed to make it easier to use and read. Originally the dataset's weather condition variable had 1000+ different unique entries but we wanted them to be categorized in just a few simple ones.  The weather_clean variable that was created that holds the weather_conditions values without all the unnecessary information and spaces. This is then piped into weather_group which categorizes the specific weather condition happening at the time of the incident such as “Rain”, “Snow”, or “Clear” and so forth.  The death_or_injury_clean variable cleans up the 10 unique values and categorizes them into 2 simple ones “death” or “injury.” After creating these new variables we filtered them to only include the values that were relevant to our research question. A season variable was also created for EDA. Finally, the Death and Injury variable was turned to binary 0/1 variable since its a categorical variable and we need a numerical values to make a linear regression model.
 
 ```{r}
 #Fix column names
@@ -159,18 +159,12 @@ horses_clean <- horses_clean %>%
 
 # 4. Exploratory Data Analysis (EDA)
 
-This section maps directly to the **EDA** part of the rubric:
-
-- Summary statistics  
-- Visualizations  
-- Interpretation connected to the research question
-
 ```{r eda-summary, message=FALSE, warning=FALSE}
 summary(horses_clean)
 ```
 
+i.
 ```{r eda-scatter-plot, message=FALSE, warning=FALSE, fig.cap="Relationship between time of year and weather related equine incidents"}
-library(ggplot2)
 ggplot(horses, aes(x = Year, color = 'white')) +
 geom_point(stat = "count", size = 3) +
 labs(
@@ -181,6 +175,9 @@ labs(
 theme_minimal()
 ```
 
+* The data overall shows a clear decline in equine incidents from 2009 to 2026 with few inconsistencies. Incident counts start at a moderate level in the late 2000s and rise very fast and peak in 2012. After that the count steadily falls. This pattern equine incidents have generally decreased over the years. The inconsistencies show how the incident counts do not decrease perfectly smoothly, indicating that many external factors such as heat, cold, rain, etc. contribute to short term increases.
+
+ii.
 ```{r}
 horses_clean %>%
   filter(death_or_injury_clean == "Injury") %>%
@@ -196,6 +193,8 @@ horses_clean %>%
 
 * This graph connects to our research question by showing which types of equine incidents happen most often in the data set. Since our project is studying the relationship between weather related variables and equine deaths or breakdowns, we first need to understand what kinds of incidents are being recorded. The most common incident types are the main categories we can later compare with weather conditions, temperature, precipitation, or season. This graph does not show a weather relationship by itself, but it gives important background for the weather analysis.
 
+
+iii.
 ```{r}
 library(tidyverse)
 
@@ -219,11 +218,9 @@ horses_clean %>%
   )
 ```
 
-
 * These graphs help connect to our question by showing how incident types changed over time. If certain years had higher numbers of specific incident categories, those changes could later be compared with weather patterns from those same years. This helps us look for possible trends before testing whether weather-related variables are connected to equine deaths or breakdowns. The graph does not prove that weather caused the incidents, but it helps identify time-based patterns that may be useful for the rest of the project.
 
-
-ii.
+iv.
 ```{r}
 horses_clean %>%
   ggplot(aes(x = season)) +
@@ -233,11 +230,10 @@ horses_clean %>%
   )
 ```
 
-* We assume that Winter has the most inclement weather out of all the seasons and yet we see that Winter has the least amount of Equine deaths and injuries which could indicate a weak correlation between season and Equine incidences if we take our assumption as the truth.  
+* We assume that Winter has the most inclement weather out of all the seasons and yet we see that Winter has the least amount of equine deaths and injuries which could indicate a weak correlation between season and equine incidences if we take our assumption as the truth. Summer season has the most incidents but that could be due to there being more races compared to other seasons.  
 
-iii.
-```{r eda-plot-example, message=FALSE, warning=FALSE, fig.cap="Example histogram of a numeric variable (EDA rubric)."}
-#Weather vs Incidents Graph
+vi.
+```{r}
 horses_clean %>%
 ggplot(aes(x = death_or_injury_clean, fill = death_or_injury_clean)) +
   geom_bar() +
@@ -247,19 +243,15 @@ ggplot(aes(x = death_or_injury_clean, fill = death_or_injury_clean)) +
     title = "Equine Incidents vs Weather Condition")
 ```
 
-* There does not appear to be a clear correlation between weather condition and Equine death or injury.
+* From observing the graph there does not appear to be a clear correlation between inclement weather condition and equine death or injury.  The weather category with the most equine deaths and incidents is the clear weather with cloudy weather being the second most.  If there was a strong correlation between inclement weather condition and equine we would expect to see rain, snow, storm, and other weather categories have higher counts compared to clear.
 
 # 5. Visualization Quality and Storytelling
 
-Use this section to satisfy the **Visualization Quality** rubric criterion:
-
-- Explain why your plot types are appropriate.  
-- Comment on labels, legends, colors, and overall readability.  
-- Mention any steps you took to make plots accessible and interpretable.
-
 * For the incident type section, we used a bar graph first because we are looking at incident type which is categorical.This graph makes sense because it lets us compare how many incidents happened in each incident type, and we flipped the graph so the incident type names are easier to read instead of crowded on the x-axis. For the second graph, we used a line graph because we are looking at incident type by year, which helps show how the incident categories changed over time instead of only showing the total number of incidents. 
 
-* For graphs ii. and iii. we used bar graphs because we were comparing two categorical variables to each other.  
+* For graph iv. we used a bar graph because we were comparing two categorical variables to each other and we wanted to see which season had the most equine incidents.  The x-axis is the seasons variable and the y-axis is the amount of incidents.  To make the plot more visible we needed to adjust some of the parameters.
+
+* For graph vi. we used faceted bar graphs because we were comparing multiple different categorical categories with equine incidents to see which category had the most incidents.  The different colors help visualize death versus injury with respect to the specific weather condition.  For visibility we also had to make the graph bigger.
 
 # 6. Modeling Approach
 
@@ -272,6 +264,7 @@ Explain how you framed the problem and which models you chose:
 For our modeling approach, we followed the plan from our proposal by using ideas from the blood pressure assignment and the car prices assignment. In the blood pressure assignment, we looked at relationships between variables and used linear models to understand trends. In the car prices assignment, we used a model with more than one explanatory variable. For our project, we used the number of incidents as the response variable because incident count is numeric and works with a linear model. The explanatory variables we focused on were year, season, weather condition, and incident type. These variables match the graphs we made because we looked at incidents over time, incident categories, incidents by season, and incidents by weather condition.
 
 For our baseline model, we would use a simple heuristic, which is a simple rule for making a prediction. Our heuristic would predict the average number of incidents every time without using year, season, weather condition, or incident type. This gives us a simple comparison for our multi-variable linear model. If the multi-variable model makes better predictions than just using the average incident count, then that would suggest that the variables we chose are useful for explaining patterns in the data.
+
 This connects to our research question because we are trying to see whether weather-related variables are connected to equine deaths and breakdowns. The incidents-over-time graph shows that incident counts changed by year, so year is an important variable to include. The incident type graphs show which categories happened the most and whether those categories changed over time. The season and weather condition graphs connect more directly to the weather part of our project because they show how incidents are spread across different seasons and weather conditions. Using a multi-variable linear model helps us look at these variables together instead of only looking at one graph or one factor at a time.
 
 
@@ -304,16 +297,15 @@ The graphs support these choices because they show that incidents are not evenly
 
 To evaluate the model, we would compare the model’s predicted incident counts to the actual incident counts. We would also compare the model to our baseline heuristic, which only predicts the average number of incidents. If the multi-variable model gives predictions that are closer to the actual incident counts than the simple average, then the variables we chose are helping explain the data. Overall, this follows our proposed method because we used time trends, incident categories, weather-related variables, and a multi-variable linear model to look for patterns connected to equine deaths and breakdowns.
 
+
+
 # 8. Conclusions & Recommendations
 
-Summarize the key takeaways:
-
-- Answer your original research question(s) directly.  
-- Highlight the most important patterns or relationships you found.  
-- Discuss limitations (data size, bias, missing variables, etc.).  
-- Suggest possible extensions or future work.
-
 * In conclusion, our project helped us see that equine deaths and breakdowns are affected by more than one factor. We looked at incident types, time trends, seasons, and weather conditions to see what patterns showed up in the data. The graphs showed that some incident categories happened more often than others, and the number of incidents was not the same every year or every season. Even though weather was the main focus of our research question, the results show that we have to be careful when interpreting the graphs. Higher incident counts in one weather condition do not automatically mean that weather caused more incidents. It may also depend on a vast number of reasons due to the various parts of racing. (doesn't take into account the races that didn't take place due to them canceling) 
+
+* Some limitations of our research could be the phenomena known as "surivivorship bias" similar to lab 11 we did in CDS 102. The apparant relationship we are seeing between equine deaths and inclement weather is affected by the fact we don't get data on how many races were canceled due to inclement weather being too bad to race.  So we can't say that weather has no correlation to equine incidents because we have to consider survivorship bias and how many horses could have been injured if they did race.  If we wanted better representation we would need to add those canceled races to the dataset and observe the results.
+
+* For extensions of future work...
 
 # 9. Code Quality & Reproducibility
 
@@ -324,6 +316,8 @@ Briefly document how someone else can reproduce your results:
 
 -Explain how code is structured and include a link to your Git repository
 
+* []
+
 # 10. References
 
 List any references you used, such as:
@@ -331,5 +325,7 @@ List any references you used, such as:
 - Dataset documentation.  
 - Research papers or articles.  
 - Tutorials or blog posts.
+
+
 
 * [Dates to seasons column tutorial](https://stackoverflow.com/questions/49702002/creating-season-variable-by-month-with-dplyr-in-r)
