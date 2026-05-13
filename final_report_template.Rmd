@@ -42,6 +42,8 @@ library(lubridate)
 library(stringr)
 library(ggplot2)
 library(tidyverse)
+library(broom)
+library(modelr)
 
 #Load dataset
 library(readr)
@@ -76,7 +78,14 @@ horses <- read_csv("data/Equine_Death_and_Breakdown.csv")
 ```{r}
 #Fix column names
 horses_clean <- horses %>%
-  rename(year = Year, incident_date = `Incident Date`, track = Track, inv_location = `Inv Location`, racing_type_description = `Racing Type Description`, division = Division, weather_conditions = `Weather Conditions`, horse = Horse, trainer = Trainer, jockey_driver = `Jockey Driver`, incident_description = `Incident Description`, death_or_injury = `Death or Injury`, incident_type = `Incident Type`)
+  rename(year = Year, incident_date = `Incident Date`, track = Track, 
+         inv_location = `Inv Location`,
+         racing_type_description = `Racing Type Description`, 
+         division = Division, weather_conditions = `Weather Conditions`, 
+         horse = Horse, trainer = Trainer, jockey_driver = `Jockey Driver`, 
+         incident_description = `Incident Description`, 
+         death_or_injury = `Death or Injury`, 
+         incident_type = `Incident Type`)
 
 #Fix dates
 horses_clean$incident_date <- mdy(horses_clean$incident_date)
@@ -86,44 +95,26 @@ horses_clean <- horses_clean %>%
   filter(!is.na(weather_conditions), !is.na(death_or_injury))
 
 #Fix weather_condition column
-#USED CHATGPT FOR THIS CODE!!!!!!!!!
-
+#Used ChatGPT to help with this cleaning part
 horses_clean <- horses_clean %>%
   mutate(
     weather_clean = weather_conditions %>%
       str_to_lower() %>%
       str_trim() %>%
-      str_replace_all("[0-9]+", "") %>%        # remove numbers
-      str_replace_all("[^a-z ]", "") %>%       # remove symbols
-      str_replace_all("couldy|cloudyy|clody", "cloudy") %>%
-      str_replace_all("raine", "rain") %>%
+      str_replace_all("[0-9]+", "") %>%        
+      str_replace_all("[^a-z ]", "") %>%
       str_squish()
   ) %>%
   
   mutate(
     weather_group = case_when(
-      
-      # Rain
-      str_detect(weather_clean, "rain|shower|drizzle") ~ "Rain",
-      
-      # Snow
+      str_detect(weather_clean, "rain|shower|drizzle|raine") ~ "Rain",
       str_detect(weather_clean, "snow|flurr|sleet") ~ "Snow",
-      
-      # Storms
       str_detect(weather_clean, "thunder|storm") ~ "Storm",
-      
-      # Cloudy / Overcast
-      str_detect(weather_clean, "cloud|coudy|cloudy") ~ "Cloudy",
-      
-      # Clear / Sunny
+      str_detect(weather_clean, "cloud|coudy|cloudy|clody") ~ "Cloudy",
       str_detect(weather_clean, "clear|sun|fair|dry") ~ "Clear",
-      
-      # Other weather conditions
       str_detect(weather_clean, "windy|fog|mist|hazy|wind") ~ "Other Weather",
-      
-      # Missing / junk
       weather_clean %in% c("", "na", "n a", "unc") | is.na(weather_clean) ~ "Unknown",
-      
       TRUE ~ "Other"
     )
   )
@@ -144,7 +135,12 @@ horses_clean <- horses_clean %>%
 
 horses_clean <- horses_clean %>%
   filter(death_or_injury_clean != "Other") %>%
-  select(year, incident_date, incident_type, track, incident_description, weather_group, death_or_injury_clean) %>%
+  select(year, incident_date, 
+         incident_type, 
+         track, 
+         incident_description, 
+         weather_group, 
+         death_or_injury_clean) %>%
   filter(weather_group != "Other" & weather_group != "Unknown")
 
 #Create season variable (Code reference linked below)
@@ -165,7 +161,7 @@ summary(horses_clean)
 ```
 
 i.
-```{r eda-scatter-plot, message=FALSE, warning=FALSE, fig.cap="Relationship between time of year and weather related equine incidents"}
+```{r eda-scatter-plot, message=FALSE, warning=FALSE, fig.width=8, fig.height=5, out.width="90%", fig.cap="Relationship between time of year and weather related equine incidents"}
 library(ggplot2)
 ggplot(horses, aes(x = Year, color = 'white')) +
 geom_line(stat = "count") +
@@ -182,7 +178,7 @@ theme_minimal()
 * The data overall shows a clear decline in equine incidents from 2009 to 2026 with few inconsistencies. Incident counts start at a moderate level in the late 2000s and rise very fast and peak in 2012. After that the count steadily falls. This pattern equine incidents have generally decreased over the years. The inconsistencies show how the incident counts do not decrease perfectly smoothly, indicating that many external factors such as heat, cold, rain, etc. contribute to short term increases.
 
 ii.
-```{r}
+```{r, fig.width=8, fig.height=7, out.width="90%"}
 horses_clean %>%
   filter(death_or_injury_clean == "Injury") %>%
   ggplot(aes(x = incident_type)) +
@@ -199,8 +195,7 @@ horses_clean %>%
 
 
 iii.
-```{r}
-
+```{r eda-top-types, fig.width=14, fig.height=11, out.width="95%"}
 horses_clean %>%
   filter(incident_type %in% c(
     "EQUINE DEATH",
@@ -224,7 +219,7 @@ horses_clean %>%
 * These graphs help connect to our question by showing how incident types changed over time. If certain years had higher numbers of specific incident categories, those changes could later be compared with weather patterns from those same years. This helps us look for possible trends before testing whether weather-related variables are connected to equine deaths or breakdowns. The graph does not prove that weather caused the incidents, but it helps identify time-based patterns that may be useful for the rest of the project.
 
 iv.
-```{r}
+```{r, fig.width=7.5, fig.height=5, out.width="85%"}
 horses_clean %>%
   ggplot(aes(x = season)) +
   geom_bar() +
@@ -236,7 +231,7 @@ horses_clean %>%
 * We assume that Winter has the most inclement weather out of all the seasons and yet we see that Winter has the least amount of equine deaths and injuries which could indicate a weak correlation between season and equine incidences if we take our assumption as the truth. Summer season has the most incidents but that could be due to there being more races compared to other seasons.  
 
 vi.
-```{r}
+```{r, fig.width=15, fig.height=10, out.width="95%"}
 horses_clean %>%
 ggplot(aes(x = death_or_injury_clean, fill = death_or_injury_clean)) +
   geom_bar() +
@@ -273,62 +268,32 @@ This connects to our research question because we are trying to see whether weat
 
 # 7. Model Implementation & Evaluation
 
-This corresponds to the **Model Implementation & Evaluation** rubric criterion.
-
-Describe:
-
-- Features used.  
-- Data splitting strategy (train/test or cross-validation).  
-- Metrics used (accuracy, F1, RMSE, etc.).  
-- Tables/plots summarizing performance.  
-- A short interpretation of each metric/plot.
-
-```{r modeling, eval=FALSE}
-# Example structure:
-# set.seed(123)
-# train_index <- sample(seq_len(nrow(data_clean)), size = 0.8 * nrow(data_clean))
-# train <- data_clean[train_index, ]
-# test  <- data_clean[-train_index, ]
-#
-# model <- glm(target ~ ., data = train, family = binomial)
-# preds <- predict(model, newdata = test, type = "response")
-# # compute metrics...
-```
-For the model implementation, the response variable would be the count of incidents, and the main features would be year, season, weather condition, and incident type. We included year as a time trend variable because the incidents-over-time graph showed that incident counts were not the same every year. This matters because the model should account for changes over time instead of treating all years as equal. We included season and weather condition because our research question focuses on weather-related factors. We also included incident type because different categories of incidents may have different patterns.
-
-The graphs support these choices because they show that incidents are not evenly spread across the dataset. The incident type graph shows that some incident categories happen more often than others. The incident type by year graph shows that those categories also changed over time. The season and weather condition graphs show that incidents were different across seasons and weather conditions. Clear and cloudy weather had higher recorded incident counts, but we have to be careful with that interpretation because it does not automatically mean those conditions caused more incidents. There may have been more races during clear or cloudy weather, which would create more chances for incidents to happen.
-
-To evaluate the model, we would compare the model’s predicted incident counts to the actual incident counts. We would also compare the model to our baseline heuristic, which only predicts the average number of incidents. If the multi-variable model gives predictions that are closer to the actual incident counts than the simple average, then the variables we chose are helping explain the data. Overall, this follows our proposed method because we used time trends, incident categories, weather-related variables, and a multi-variable linear model to look for patterns connected to equine deaths and breakdowns.
-
 
 
 # 8. Conclusions & Recommendations
 
-* In conclusion, our project helped us see that equine deaths and breakdowns are affected by more than one factor. We looked at incident types, time trends, seasons, and weather conditions to see what patterns showed up in the data. The graphs showed that some incident categories happened more often than others, and the number of incidents was not the same every year or every season. Even though weather was the main focus of our research question, the results show that we have to be careful when interpreting the graphs. Higher incident counts in one weather condition do not automatically mean that weather caused more incidents. It may also depend on a vast number of reasons due to the various parts of racing. (doesn't take into account the races that didn't take place due to them canceling) 
+* In conclusion, our project helped us see that equine deaths and breakdowns are affected by more than one factor. We looked at incident types, time trends, seasons, and weather conditions to see what patterns showed up in the data. The graphs showed that some incident categories happened more often than others, and the number of incidents was not the same every year or every season. Even though weather was the main focus of our research question, the results show that we have to be careful when interpreting the graphs. Higher incident counts in one weather condition do not automatically mean that weather caused more incidents. It may also depend on a vast number of reasons due to the various parts of racing. 
 
-* Some limitations of our research could be the phenomena known as "surivivorship bias" similar to lab 11 we did in CDS 102. The apparant relationship we are seeing between equine deaths and inclement weather is affected by the fact we don't get data on how many races were canceled due to inclement weather being too bad to race.  So we can't say that weather has no correlation to equine incidents because we have to consider survivorship bias and how many horses could have been injured if they did race.  If we wanted better representation we would need to add those canceled races to the dataset and observe the results.
+* Some limitations of our research could be the phenomena known as "surivivorship bias" similar to lab 11 we did in CDS 102. The apparent relationship we are seeing between equine deaths and inclement weather is affected by the fact we don't get data on how many races were canceled due to inclement weather being too bad to race.  So we can't say that weather has no correlation to equine incidents because we have to consider survivorship bias and how many horses could have been injured if they did race.  If we wanted better representation we would need to add those canceled races to the dataset and observe the results.
 
-* For extensions of future work...
+* A useful extension for our project would be to expand our data and add more detailed information about the horses themselves. For example, we could determine the age of the horse as well as the condition to determine if the horse had any previous injuries that would lower their chances at survival. Another important extension would be to include data on if races were cancelled due to extreme weather, as we cannot see how many deaths would have been caused by weather if the races were actually done.
 
 # 9. Code Quality & Reproducibility
 
-Briefly document how someone else can reproduce your results:
+* Someone can reproduce our results by opening the project in RStudio and running the final_report_template.Rmd file from top to bottom. The horses.csv file needs to be in the project folder so the dataset loads correctly. The required packages are tidyverse, readr, ggplot2, broom, modelr, dplyer, lubridate, and reader. Our code is organized in the same order as the report: data loading, data cleaning, EDA graphs, modeling, and evaluation. The cleaned dataset horses_clean is used for the graphs and model, so the cleaning code has to run first.
 
-- Which R scripts or Rmd files to run.  
-- Any required R packages.
+* [GitHub repository](https://github.com/justindinh1/cds_101_final_project.git)
 
--Explain how code is structured and include a link to your Git repository
-
-* []
+```{r session-info, echo=FALSE}
+sessionInfo()
+```
 
 # 10. References
 
-List any references you used, such as:
+* [CDS Textbook](https://cdsbook.github.io/book/src/book/10_modeling_chapter.html)
 
-- Dataset documentation.  
-- Research papers or articles.  
-- Tutorials or blog posts.
+* [Equine Breakdown, Death, Injury and Incident Database Overview](https://data.ny.gov/api/views/q6ts-kwhk/files/2f87ea93-d54c-4307-b178-5e6ceda56ef5?download=true&filename=GAMING_EquineDeathAndBreakdown_Overview.pdf)
 
-
+* [NYS Gaming Commision Equine Breakdown](https://data.ny.gov/api/views/q6ts-kwhk/files/fb3fb320-6305-4422-8af2-c57b007b7bc0?download=true&filename=GAMING_EquineDeathAndBreakdown_DataDictionary.pdf)
 
 * [Dates to seasons column tutorial](https://stackoverflow.com/questions/49702002/creating-season-variable-by-month-with-dplyr-in-r)
