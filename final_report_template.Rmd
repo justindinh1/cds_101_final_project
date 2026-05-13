@@ -27,14 +27,14 @@ output:
 ```{r setup-data, echo=FALSE, message=FALSE, warning=FALSE}
 # DO NOT ALTER THIS CHUNK
 knitr::opts_chunk$set(
-  echo = TRUE,
-  eval = TRUE,
-  fig.width = 5,
-  fig.asp = 0.618,
-  out.width = "70%",
-  dpi = 120,
-  fig.align = "center",
-  cache = FALSE
+	eval = TRUE,
+	echo = TRUE,
+	fig.align = "center",
+	fig.asp = 0.618,
+	fig.width = 5,
+	cache = FALSE,
+	dpi = 120,
+	out.width = "70%"
 )
 #Load packages
 library(dplyr)
@@ -253,26 +253,87 @@ ggplot(aes(x = death_or_injury_clean, fill = death_or_injury_clean)) +
 
 # 6. Modeling Approach
 
-Explain how you framed the problem and which models you chose:
-
-- Type of task (regression, classification, etc.).  
-- Baseline model or heuristic, if used.  
-- Main model(s) chosen and why they are appropriate.
-
 For our modeling approach, we followed the plan from our proposal by using ideas from the blood pressure assignment and the car prices assignment. In the blood pressure assignment, we looked at relationships between variables and used linear models to understand trends. In the car prices assignment, we used a model with more than one explanatory variable. For our project, we used the number of incidents as the response variable because incident count is numeric and works with a linear model. The explanatory variables we focused on were year, season, weather condition, and incident type. These variables match the graphs we made because we looked at incidents over time, incident categories, incidents by season, and incidents by weather condition.
 
 For our baseline model, we would use a simple heuristic, which is a simple rule for making a prediction. Our heuristic would predict the average number of incidents every time without using year, season, weather condition, or incident type. This gives us a simple comparison for our multi-variable linear model. If the multi-variable model makes better predictions than just using the average incident count, then that would suggest that the variables we chose are useful for explaining patterns in the data.
 
 This connects to our research question because we are trying to see whether weather-related variables are connected to equine deaths and breakdowns. The incidents-over-time graph shows that incident counts changed by year, so year is an important variable to include. The incident type graphs show which categories happened the most and whether those categories changed over time. The season and weather condition graphs connect more directly to the weather part of our project because they show how incidents are spread across different seasons and weather conditions. Using a multi-variable linear model helps us look at these variables together instead of only looking at one graph or one factor at a time.
 
-
 # 7. Model Implementation & Evaluation
 
+```{r}
+weather_model_data <- horses_clean %>%
+  count(weather_group, incident_type, name = "incident_count", sort = TRUE)
+```
+
+```{r}
+weather_incident_model <- lm(
+  incident_count ~ weather_group + incident_type,
+  data = weather_model_data
+  )
+```
+
+```{r}
+weather_incident_model %>%
+  tidy()
+```
+
+```{r}
+weather_incident_model %>%
+glance() %>%
+select(r.squared)
+```
+
+```{r}
+weather_model_data <- weather_model_data %>%
+  add_predictions(weather_incident_model) %>%
+    add_residuals(weather_incident_model)
+```
+
+```{r}
+weather_model_data 
+```
+
+* For the model implementation, we first grouped the data by weather group and incident type. Since the horse dataset records one incident per row, we used count() to create a numeric response variable called incident_count. This is different from Assignment 6, where mutate() was used because the dataset already had numeric variables and only needed a new calculated column. In our project, we needed count() because there was no total incident count column already in the data. We also used sort = TRUE to show the largest counts first, which makes the table easier to read but does not change the model. Then we used a linear model to see whether the weather group and incident type helped explain the number of incidents. tidy() shows the model estimates, glance() gives the R-squared value, and predictions and residuals help compare the model’s predicted counts to the actual counts.
+
+```{r}
+horses_clean %>%
+  filter(weather_group %in% c(
+    "Clear",
+    "Cloudy",
+    "Rain",
+    "Snow",
+    "Storm",
+    "Other Weather"
+  )) %>%
+  count(year, weather_group) %>%
+  ggplot(aes(x = year, y = n)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  facet_wrap(~ weather_group, scales = "free_y") +
+  labs(
+    title = "Incidents by Weather Condition Over Time",
+    x = "Year",
+    y = "Number of Incidents"
+  )
+```
+
+* We used this graph method because our research question focuses on weather and equine incidents, but weather is a categorical variable. Since the dataset records one incident per row, we first had to count how many incidents happened in each weather condition by year. This let us compare the number of incidents over time for each weather group. We used separate panels for each weather condition so the graph would not be too crowded and so each weather pattern could be seen more clearly. 
+
+* [https://dplyr.tidyverse.org/](https://dplyr.tidyverse.org/)
+
+* For the model implementation, the response variable would be the count of incidents, and the main features would be year, season, weather condition, and incident type. We included year as a time trend variable because the incidents-over-time graph showed that incident counts were not the same every year. This matters because the model should account for changes over time instead of treating all years as equal. We included season and weather conditions because our research question focuses on weather-related factors. We also included incident type because different categories of incidents may have different patterns.
+
+* The graphs support these choices because they show that incidents are not evenly spread across the dataset. The incident type graph shows that some incident categories happen more often than others. The incident type by year graph shows that those categories also changed over time. The season and weather condition graphs show that incidents were different across seasons and weather conditions. Clear and cloudy weather had higher recorded incident counts, but we have to be careful with that interpretation because it does not automatically mean those conditions caused more incidents. There may have been more races during clear or cloudy weather, which would create more chances for incidents to happen.
+
+* The graphs and model output helped us see that incidents were not evenly spread across the dataset. Some incident types happened more often than others, and incident counts also changed across year, season, and weather conditions. However, after working with the data more, we realized that some of our most important variables, like incident type and death or injury, are categorical. Because of that, logistic regression may have been a better model choice if we were trying to predict a category such as death or injury. Since we realized this late in the project, we kept the linear model as an exploratory model for incident counts, but we recognize this as a limitation and a possible improvement for future work.
 
 
 # 8. Conclusions & Recommendations
 
 * In conclusion, our project helped us see that equine deaths and breakdowns are affected by more than one factor. We looked at incident types, time trends, seasons, and weather conditions to see what patterns showed up in the data. The graphs showed that some incident categories happened more often than others, and the number of incidents was not the same every year or every season. Even though weather was the main focus of our research question, the results show that we have to be careful when interpreting the graphs. Higher incident counts in one weather condition do not automatically mean that weather caused more incidents. It may also depend on a vast number of reasons due to the various parts of racing. 
+
+* Overall, our findings showed that equine incidents were not spread evenly across the dataset. Some incident types happened much more often than others, especially injury-related incidents, and the number of incidents changed over time. We also saw differences between seasons and weather conditions, with higher incident counts appearing in clear and cloudy weather. However, this does not prove that those weather conditions caused more incidents because there may have been more races during those conditions. Based on our graphs, weather may be connected to incident patterns, but other factors like year, season, and incident type also seem important.
 
 * Some limitations of our research could be the phenomena known as "surivivorship bias" similar to lab 11 we did in CDS 102. The apparent relationship we are seeing between equine deaths and inclement weather is affected by the fact we don't get data on how many races were canceled due to inclement weather being too bad to race.  So we can't say that weather has no correlation to equine incidents because we have to consider survivorship bias and how many horses could have been injured if they did race.  If we wanted better representation we would need to add those canceled races to the dataset and observe the results.
 
@@ -289,6 +350,8 @@ sessionInfo()
 ```
 
 # 10. References
+
+* [Equine Death and Breadown Dataset](https://catalog.data.gov/dataset/equine-death-and-breakdown)
 
 * [CDS Textbook](https://cdsbook.github.io/book/src/book/10_modeling_chapter.html)
 
