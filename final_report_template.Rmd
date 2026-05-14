@@ -331,6 +331,25 @@ horses_clean %>%
 * The model helped us explore whether weather conditions were related to incident count, but we realized that our data also has important categorical variables, such as incident type and death or injury. Because of that, logistic regression may have been a better model if we were trying to predict a category like death or injury. Since our main question was focused on whether weather is connected to a higher number of incidents, we kept the linear model as an exploratory model for incident counts. However, we recognize that the model is limited, and a future version of the project could use logistic regression or a stronger weather-focused model to better test the relationship between weather and equine incidents.
  improvement for future work.
 
+```{r}
+horses_binary <- horses_clean %>%
+  filter(death_or_injury_clean %in% c("Death", "Injury")) %>%
+  mutate(
+    death_binary = if_else(death_or_injury_clean == "Death", 1, 0)
+  )
+
+weather_death_model <- glm(
+  death_binary ~ weather_group + incident_type,
+  data = horses_binary,
+  family = binomial
+)
+
+weather_death_model %>%
+  tidy()
+```
+
+* This model is based on the logistic regression structure from Assignment 11, especially Exercises 6 and 8. Like Assignment 11, we created a binary outcome variable and used glm() with family = binomial. Instead of predicting Titanic survival, our model predicts whether an equine incident resulted in death or injury using weather group and incident type as predictors. 
+
 
 # 8. Conclusions & Recommendations
 
